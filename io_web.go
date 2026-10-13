@@ -61,6 +61,7 @@ func InitIO() {
 	inputChan := make(chan byte, 1024)
 	InputReader = &jsReader{ch: inputChan}
 	js.Global().Set("handleTerminalInput", js.FuncOf(func(this js.Value, args []js.Value) any {
+		log.Println("handleTerminalInput")
 		if len(args) == 0 {
 			return nil
 		}
