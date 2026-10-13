@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -20,6 +21,7 @@ var (
 )
 
 func main() {
+	log.Println("init debug - main")
 	// initialize IO based on what was included in build
 	InitIO()
 

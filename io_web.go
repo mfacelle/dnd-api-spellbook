@@ -53,6 +53,7 @@ func (r *jsReader) Read(p []byte) (n int, err error) {
 
 // set up IO for using xterm.js
 func InitIO() {
+	log.Println("init debug")
 	// fetch the global xterm instance from the browser window context.
 	// assumes terminal exposed in JS via window.term = new Terminal();
 	term := js.Global().Get("term")
