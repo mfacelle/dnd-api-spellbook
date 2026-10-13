@@ -71,13 +71,13 @@ func InitIO() {
 	// setup the custom writer
 	OutputWriter = &jsWriter{terminal: term}
 
-	// bind xterm.js data event to push into Go channel
-	onDataCallback := js.FuncOf(func(this js.Value, args []js.Value) any {
-		inputStr := args[0].String()
-		for i := 0; i < len(inputStr); i++ {
-			inputChan <- inputStr[i]
-		}
-		return nil
-	})
-	term.Call("onData", onDataCallback)
+	// // bind xterm.js data event to push into Go channel
+	// onDataCallback := js.FuncOf(func(this js.Value, args []js.Value) any {
+	// 	inputStr := args[0].String()
+	// 	for i := 0; i < len(inputStr); i++ {
+	// 		inputChan <- inputStr[i]
+	// 	}
+	// 	return nil
+	// })
+	// term.Call("onData", onDataCallback)
 }

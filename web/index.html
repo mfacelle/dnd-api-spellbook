@@ -36,8 +36,8 @@
             // 4. Feed keystrokes directly into Go WASM via a exposed function
             term.onData((data) => {
                 term.writeln("onData\r\n");
-                if (window.handleTerminalInput) {
-                    window.handleTerminalInput(data);
+                if (globalThis.handleTerminalInput) {
+                    globalThis.handleTerminalInput(data);
                 }
             });
         }).catch((err) => {
