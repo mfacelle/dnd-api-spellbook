@@ -21,11 +21,12 @@
         // 1. Initialize Xterm.js
         const term = new Terminal({
             cursorBlink: true,
-            theme: { background: '#1e1e1e' }
+            theme: { background: '#1e1e1e' },
+            cols: 120,
+            rows: 30
         });
         term.open(document.getElementById('terminal'));
         window.term = term
-        term.writeln('Initializing Go WebAssembly CLI...\r\n');
 
         <!-- trying really simple implementation for now -->
         const go = new Go();
