@@ -8,6 +8,11 @@
 *.so
 *.dylib
 
+# ignore stuff pulled down via npm
+node_modules
+package-lock.json
+package.json
+
 # Test binary, built with `go test -c`
 *.test
 

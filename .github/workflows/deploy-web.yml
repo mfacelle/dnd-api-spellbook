@@ -2,6 +2,7 @@ name: Deploy Web
 on:
   push:
     branches:
+      - dev/web_runner
       - main
 permissions:
   contents: read
@@ -31,6 +32,10 @@ jobs:
 
       - name: Get latest wasm_exec.js
         run: cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" web/
+
+      - name: Copy xterm dependencies
+        run:
+          cp -r thirdparty web/
 
       - name: Configure pages
         uses: actions/configure-pages@v5

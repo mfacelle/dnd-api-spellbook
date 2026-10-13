@@ -8,50 +8,58 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 )
 
+// global reader and writer that will be initialized differently depending on the build target.
+// allows different io handling for cli build vs wasm (which requires javascript stuff)
+var (
+	InputReader  io.Reader
+	OutputWriter io.Writer
+)
+
 func main() {
+	// initialize IO based on what was included in build
+	InitIO()
 
 	apiClient := dndapi.NewDndApiClient(http.Client{
 		Timeout: 10 * time.Second,
 	})
 	mySpellbook := spellbook.NewSpellbook(apiClient)
 
-	fmt.Println("")
-	fmt.Println("Welcome to Mike's D&D Spellbook!")
+	fmt.Fprintln(OutputWriter, "")
+	fmt.Fprintln(OutputWriter, "Welcome to Mike's D&D Spellbook!")
 
 	// loop until user types "exit"
 	for {
 		// TODO kind of a clunky interface, but I guess it works for now
-		fmt.Println("")
-		fmt.Println("Special Commands:")
-		fmt.Println("   mine: Display only the spells currently in my spellbook")
-		fmt.Println("   all:  Display all possible spells")
-		fmt.Println("   exit: Close the book (exit the program)")
-		fmt.Print("Enter a spell name or special command: ")
-		name, err := processSpellName(os.Stdin)
+		fmt.Fprintln(OutputWriter, "")
+		fmt.Fprintln(OutputWriter, "Special Commands:")
+		fmt.Fprintln(OutputWriter, "   mine: Display only the spells currently in my spellbook")
+		fmt.Fprintln(OutputWriter, "   all:  Display all possible spells")
+		fmt.Fprintln(OutputWriter, "   exit: Close the book (exit the program)")
+		fmt.Fprint(OutputWriter, "Enter a spell name or special command: ")
+		name, err := processSpellName(InputReader)
 
 		// handle exit command
 		if strings.EqualFold(formatInput(name), "exit") {
-			fmt.Println("")
-			fmt.Println("Exiting...")
+			fmt.Fprintln(OutputWriter, "")
+			fmt.Fprintln(OutputWriter, "Exiting...")
 			return
 		}
 
 		// handle non-exit special commands
 		if strings.EqualFold(formatInput(name), "mine") {
-			fmt.Println("")
-			fmt.Println("My Spells:")
-			fmt.Println(mySpellbook.FormatMySpells())
+			fmt.Fprintln(OutputWriter, "")
+			fmt.Fprintln(OutputWriter, "My Spells:")
+			fmt.Fprintln(OutputWriter, mySpellbook.FormatMySpells())
 			continue
 		}
 		if strings.EqualFold(formatInput(name), "all") {
-			fmt.Println("")
-			fmt.Println("All Spells:")
-			fmt.Println(mySpellbook.FormatAllSpells())
+			fmt.Fprintln(OutputWriter, "")
+			fmt.Fprintln(OutputWriter, "All Spells:")
+			fmt.Fprintln(OutputWriter, mySpellbook.FormatAllSpells())
 			continue
 		}
 
@@ -59,7 +67,7 @@ func main() {
 		if err == nil {
 			err = lookupSpell(mySpellbook, name)
 		} else {
-			fmt.Println("Error: ", err)
+			fmt.Fprintln(OutputWriter, "Error: ", err)
 		}
 	}
 }
@@ -68,7 +76,7 @@ func main() {
 func processSpellName(input io.Reader) (string, error) {
 	line, err := bufio.NewReader(input).ReadString('\n')
 	if err != nil && !errors.Is(err, io.EOF) {
-		return "", fmt.Errorf("Error reading spell name: %w", err)
+		return "", fmt.Errorf("Error reading spell name %w", err)
 	}
 	name := strings.TrimSpace(line)
 
@@ -83,15 +91,15 @@ func lookupSpell(mySpellbook *spellbook.Spellbook, name string) error {
 	spell, found := mySpellbook.GetSpell(name)
 	if !found {
 		// TODO add some kind of logic to find similar names and prompt "did you mean...?"
-		fmt.Println("")
-		fmt.Printf("Spell not found: %s\n", name)
+		fmt.Fprintln(OutputWriter, "")
+		fmt.Fprintf(OutputWriter, "Spell not found: %s\n", name)
 		return fmt.Errorf("spell not found: %s", name)
 	}
 
 	// print spell details (and add newlines for some formatting)
-	fmt.Println("")
-	fmt.Println(spellbook.FormatSpellDetails(spell))
-	fmt.Println("")
+	fmt.Fprintln(OutputWriter, "")
+	fmt.Fprintln(OutputWriter, spellbook.FormatSpellDetails(spell))
+	fmt.Fprintln(OutputWriter, "")
 
 	return nil
 }

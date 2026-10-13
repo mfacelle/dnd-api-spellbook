@@ -6,8 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Go WebAssembly on GitHub Pages</title>
     <!-- Include Xterm.js Styles and Script -->
-    <link rel="stylesheet" href="https://jsdelivr.net" />
-    <script src="https://jsdelivr.net"></script>
+     <!-- had to download and push to this repo, so it's accessible via github pages -->
+    <link rel="stylesheet" href="./thirdparty/xterm/xterm.css" />
+    <script src="./thirdparty/xterm/xterm.js"></script>
     <!-- Include the Go WASM execution adapter -->
     <script src="./wasm_exec.js"></script>
 </head>
@@ -15,58 +16,53 @@
 
     <div id="terminal" style="width: 100%; height: 500px;"></div>
 
-    <!-- from google AI results, launch terminal emulator so the app is actually usable -->
     <script>
-        // 1. Initialize Xterm.js
+        // set up xterm
         const term = new Terminal({
             cursorBlink: true,
-            theme: { background: '#1e1e1e' }
+            theme: { background: '#1e1e1e' },
+            rows: 60,
+            cols: 120
         });
         term.open(document.getElementById('terminal'));
-        term.writeln('Initializing Go WebAssembly CLI...\r\n');
+        globalThis.term = term
+        term.writeln("Loading Go WebAssembly backend...\r\n");
 
+        // for storing current line
         let currentLine = '';
 
-        // 2. Load and run the Go WASM Binary
+        // initialize and run Go
         const go = new Go();
-        WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject)
-            .then((result) => {
-                go.run(result.instance); // Runs main() and registers runGoCommand
-                term.write('Go CLI Ready. Type "help" to begin.\r\n\r\n$ ');
-                setupTerminalInput();
-            })
-            .catch((err) => {
-                term.writeln('Error loading WASM: ' + err);
-            });
 
-        // 3. Handle Terminal Interactivity
-        function setupTerminalInput() {
-            term.onData(e => {
-                switch (e) {
-                    case '\r': // Enter key
+        WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
+            go.run(result.instance);
+            
+            // on data, handle special characters and pass completed lines into Go application
+            term.onData((data) => {
+                switch (data) {
+                    case '\r': // enter key
                         term.write('\r\n');
-                        if (currentLine.trim().length > 0) {
-                            // Call the Go function exposed via syscall/js
-                            const output = window.runGoCommand(currentLine);
-                            if (output) {
-                                term.writeln(output);
-                            }
+                        // Send the complete line so Go's ReadString('\n') can return it.
+                        const output = globalThis.handleTerminalInput(currentLine);
+                        if (output) {
+                            term.writeln(output);
                         }
                         currentLine = '';
-                        term.write('$ ');
                         break;
-                    case '\u007F': // Backspace
+                    case '\u007F': // backspace
                         if (currentLine.length > 0) {
                             currentLine = currentLine.slice(0, -1);
                             term.write('\b \b');
                         }
                         break;
-                    default: // Visible characters
-                        currentLine += e;
-                        term.write(e);
+                    default: // normal characters
+                        currentLine += data;
+                        term.write(data);
                 }
             });
-        }
+        }).catch((err) => {
+            console.error("Failed to load WASM:", err);
+        });
     </script>
 </body>
 </html>
