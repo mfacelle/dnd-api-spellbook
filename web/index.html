@@ -43,7 +43,7 @@
                         term.write('\r\n');
                         if (currentLine.trim().length > 0) {
                             // call the Go function exposed via syscall/js
-                            const output = globalThis.handleTerminalInput(currentLine);
+                            const output = globalThis.runGoCommand(currentLine);
                             if (output) {
                                 term.writeln(output);
                             }
