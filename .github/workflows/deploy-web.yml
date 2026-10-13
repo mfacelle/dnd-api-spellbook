@@ -33,6 +33,12 @@ jobs:
       - name: Get latest wasm_exec.js
         run: cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" web/
 
+      - name: Copy xterm dependencies
+        run:
+          mkdir -p web/thirdparty/xterm
+          cp "$(go env GOROOT)/lib/wasm/xterm.css" web/thirdparty/xterm/
+          cp "$(go env GOROOT)/lib/wasm/xterm.js" web/thirdparty/xterm/
+
       - name: Configure pages
         uses: actions/configure-pages@v5
 
