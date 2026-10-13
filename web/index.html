@@ -27,48 +27,11 @@
         window.term = term
         term.writeln('Initializing Go WebAssembly CLI...\r\n');
 
-        let currentLine = '';
-
-        // 2. Load and run the Go WASM Binary
+        <!-- trying really simple implementation for now -->
         const go = new Go();
-        WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject)
-            .then((result) => {
-                go.run(result.instance); // Runs main() and registers runGoCommand
-                term.write('Go CLI Ready. Type "help" to begin.\r\n\r\n$ ');
-                setupTerminalInput();
-            })
-            .catch((err) => {
-                term.writeln('Error loading WASM: ' + err);
-            });
-
-        // 3. Handle Terminal Interactivity
-        function setupTerminalInput() {
-            term.onData(e => {
-                switch (e) {
-                    case '\r': // Enter key
-                        term.write('\r\n');
-                        if (currentLine.trim().length > 0) {
-                            // Call the Go function exposed via syscall/js
-                            const output = window.runGoCommand(currentLine);
-                            if (output) {
-                                term.writeln(output);
-                            }
-                        }
-                        currentLine = '';
-                        term.write('$ ');
-                        break;
-                    case '\u007F': // Backspace
-                        if (currentLine.length > 0) {
-                            currentLine = currentLine.slice(0, -1);
-                            term.write('\b \b');
-                        }
-                        break;
-                    default: // Visible characters
-                        currentLine += e;
-                        term.write(e);
-                }
-            });
-        }
+        WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
+            go.run(result.instance);
+        });
     </script>
 </body>
 </html>
