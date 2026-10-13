@@ -2,6 +2,7 @@ name: Deploy Web
 on:
   push:
     branches:
+      - dev/web_runner
       - main
 permissions:
   contents: read
