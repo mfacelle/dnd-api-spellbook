@@ -24,6 +24,7 @@
             theme: { background: '#1e1e1e' }
         });
         term.open(document.getElementById('terminal'));
+        window.term = term
         term.writeln('Initializing Go WebAssembly CLI...\r\n');
 
         let currentLine = '';

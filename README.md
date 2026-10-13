@@ -4,6 +4,10 @@ A simple Go command-line application for looking up D&D 2024 spells through the 
 
 Stores information about spells when they are retrieved from the API and "writes" them into the spellbook, so future searches don't require an additional API call.
 
+Had to figure out a good way to get this to work on both command line and via web.  Running via web requires a javascript terminal, as the regular stdin/stdout can't be used.  Ended up grabbing xterm.js and figuring out (with lots of googling) how to route xterm.js io to/from the Go wasm app.
+
+Using conditional compilation to choose one of two IO implementations (io_std.go vs io_web.go), based on whether or not it's a wasm build.
+
 
 ## Usage
 
