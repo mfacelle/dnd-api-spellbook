@@ -1,0 +1,45 @@
+name: Deploy Web
+on:
+  push:
+    branches:
+      - main
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+          
+      - name: Build WebAssembly
+        env:
+          GOOS: js
+          GOARCH: wasm
+        run: |
+          GOOS=js GOARCH=wasm go build -o ./web/main.wasm .
+
+      - name: Get latest wasm_exec.js
+        run: cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" web/
+
+      - name: Configure pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload pages artifacts
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+
+      - name: Deploy to github pages
+        id: deployment
+        uses: actions/deploy-pages@v4

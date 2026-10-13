@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<!-- trying results from google -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go WebAssembly on GitHub Pages</title>
+    <!-- Include the Go WASM execution adapter -->
+    <script src="./wasm_exec.js"></script>
+    <script>
+        // Instantiate and run the Go binary
+        const go = new Go();
+        WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject)
+            .then((result) => {
+                go.run(result.instance);
+            })
+            .catch((err) => {
+                console.error("Failed to load WASM:", err);
+            });
+    </script>
+</head>
+<body>
+    <h1>GitHub Pages + Golang WASM</h1>
+    <p id="wasm-message">Loading WebAssembly application...</p>
+</body>
+</html>
