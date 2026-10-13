@@ -24,6 +24,7 @@
             cols: 120
         });
         term.open(document.getElementById('terminal'));
+        globalThis.term = term
         term.writeln("Loading Go WebAssembly backend...");
 
         // 2. Initialize Go WASM Runtime

@@ -3,7 +3,6 @@
 package main
 
 import (
-	"log"
 	"strings"
 	"syscall/js"
 )
@@ -15,7 +14,6 @@ type jsWriter struct {
 
 // writes via xterm.js write method
 func (w *jsWriter) Write(p []byte) (n int, err error) {
-	log.Println("Write")
 	// replace newlines with windows-style newlines
 	outputStr := strings.ReplaceAll(string(p), "\n", "\r\n")
 	// call xterm.js terminal.write() method
@@ -72,14 +70,4 @@ func InitIO() {
 
 	// setup the custom writer
 	OutputWriter = &jsWriter{terminal: term}
-
-	// // bind xterm.js data event to push into Go channel
-	// onDataCallback := js.FuncOf(func(this js.Value, args []js.Value) any {
-	// 	inputStr := args[0].String()
-	// 	for i := 0; i < len(inputStr); i++ {
-	// 		inputChan <- inputStr[i]
-	// 	}
-	// 	return nil
-	// })
-	// term.Call("onData", onDataCallback)
 }
