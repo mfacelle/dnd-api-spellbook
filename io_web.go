@@ -24,7 +24,8 @@ func (w *jsWriter) Write(p []byte) (n int, err error) {
 
 // jsReader blocks and waits for input chunks emitted by xterm.js
 type jsReader struct {
-	ch chan byte
+	ch      chan []byte
+	pending []byte
 }
 
 // blocks until a byte is available, then reads
@@ -33,42 +34,32 @@ func (r *jsReader) Read(p []byte) (n int, err error) {
 	if len(p) == 0 {
 		return 0, nil
 	}
-	// block until at least one byte is received
-	b := <-r.ch
-	p[0] = b
-	n = 1
-
-	// get any other available bytes in the channel up to length
-	for n < len(p) {
-		select {
-		case b := <-r.ch:
-			p[n] = b
-			n++
-		default:
-			return n, nil
-		}
+	if len(r.pending) == 0 {
+		r.pending = <-r.ch
 	}
+	n = copy(p, r.pending)
+	r.pending = r.pending[n:]
+	log.Println("received " + string(p[:n]))
 	return n, nil
 }
 
 // set up IO for using xterm.js
 func InitIO() {
-	log.Println("init debug")
 	// fetch the global xterm instance from the browser window context.
 	// assumes terminal exposed in JS via window.term = new Terminal();
 	term := js.Global().Get("term")
 
 	// setup the custom reader and channel
-	inputChan := make(chan byte, 1024)
-	InputReader = &jsReader{ch: inputChan}
+	inputChan := make(chan []byte, 16)
+	reader := &jsReader{ch: inputChan}
+	InputReader = reader
 	js.Global().Set("handleTerminalInput", js.FuncOf(func(this js.Value, args []js.Value) any {
 		log.Println("handleTerminalInput")
 		if len(args) == 0 {
-			return nil
+			return false
 		}
 
-		input := args[0].String()
-		InputReader.Read([]byte(input))
+		inputChan <- []byte(args[0].String() + "\n")
 		return true
 	}))
 

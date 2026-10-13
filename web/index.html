@@ -41,12 +41,10 @@
                 switch (data) {
                     case '\r': // enter key
                         term.write('\r\n');
-                        if (currentLine.trim().length > 0) {
-                            // call the Go function exposed via syscall/js
-                            const output = globalThis.handleTerminalInput(currentLine);
-                            if (output) {
-                                term.writeln(output);
-                            }
+                        // Send the complete line so Go's ReadString('\n') can return it.
+                        const output = globalThis.handleTerminalInput(currentLine);
+                        if (output) {
+                            term.writeln(output);
                         }
                         currentLine = '';
                         break;
