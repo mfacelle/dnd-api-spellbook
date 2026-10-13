@@ -3,6 +3,7 @@
 package main
 
 import (
+	"log"
 	"strings"
 	"syscall/js"
 )
@@ -14,6 +15,7 @@ type jsWriter struct {
 
 // writes via xterm.js write method
 func (w *jsWriter) Write(p []byte) (n int, err error) {
+	log.Println("Write")
 	// replace newlines with windows-style newlines
 	outputStr := strings.ReplaceAll(string(p), "\n", "\r\n")
 	// call xterm.js terminal.write() method
