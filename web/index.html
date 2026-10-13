@@ -20,7 +20,8 @@
         // set up xterm
         const term = new Terminal({
             cursorBlink: true,
-            rows: 24,
+            theme: { background: '#1e1e1e' },
+            rows: 80,
             cols: 120
         });
         term.open(document.getElementById('terminal'));
