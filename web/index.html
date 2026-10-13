@@ -25,19 +25,18 @@
         });
         term.open(document.getElementById('terminal'));
         globalThis.term = term
-        term.writeln("Loading Go WebAssembly backend...");
+        term.writeln("Loading Go WebAssembly backend...\r\n");
 
         // 2. Initialize Go WASM Runtime
         const go = new Go();
 
         WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
             go.run(result.instance);
-            term.writeln("Go WASM Subsystem Active.\r\n");
             
             // 4. Feed keystrokes directly into Go WASM via a exposed function
             term.onData((data) => {
                 term.writeln("onData\r\n");
-                switch (e) {
+                switch (data) {
                     case '\r': // Enter key
                         term.write('\r\n');
                         if (currentLine.trim().length > 0) {
@@ -48,7 +47,6 @@
                             }
                         }
                         currentLine = '';
-                        term.write('$ ');
                         break;
                     case '\u007F': // Backspace
                         if (currentLine.length > 0) {
@@ -57,8 +55,8 @@
                         }
                         break;
                     default: // Visible characters
-                        currentLine += e;
-                        term.write(e);
+                        currentLine += data;
+                        term.write(data);
                 }
             });
         }).catch((err) => {
