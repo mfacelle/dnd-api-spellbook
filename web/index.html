@@ -17,7 +17,7 @@
     <div id="terminal" style="width: 100%; height: 500px;"></div>
 
     <script>
-        // 1. Initialize Xterm.js
+        // set up xterm
         const term = new Terminal({
             cursorBlink: true,
             rows: 24,
@@ -27,7 +27,10 @@
         globalThis.term = term
         term.writeln("Loading Go WebAssembly backend...\r\n");
 
-        // 2. Initialize Go WASM Runtime
+        // for storing current line
+        let currentLine = '';
+
+        // initialize and run Go
         const go = new Go();
 
         WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
@@ -37,7 +40,7 @@
             term.onData((data) => {
                 term.writeln("onData\r\n");
                 switch (data) {
-                    case '\r': // Enter key
+                    case '\r': // enter key
                         term.write('\r\n');
                         if (currentLine.trim().length > 0) {
                             // call the Go function exposed via syscall/js
@@ -48,13 +51,13 @@
                         }
                         currentLine = '';
                         break;
-                    case '\u007F': // Backspace
+                    case '\u007F': // backspace
                         if (currentLine.length > 0) {
                             currentLine = currentLine.slice(0, -1);
                             term.write('\b \b');
                         }
                         break;
-                    default: // Visible characters
+                    default: // normal characters
                         currentLine += data;
                         term.write(data);
                 }
