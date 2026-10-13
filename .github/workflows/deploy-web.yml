@@ -35,8 +35,7 @@ jobs:
 
       - name: Copy xterm dependencies
         run:
-          cp "$(go env GOROOT)/lib/wasm/xterm.css" web/
-          cp "$(go env GOROOT)/lib/wasm/xterm.js" web/
+          cp -r thirdparty web/
 
       - name: Configure pages
         uses: actions/configure-pages@v5
