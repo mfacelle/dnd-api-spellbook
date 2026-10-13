@@ -17,9 +17,8 @@
 
     <div id="terminal" style="width: 100%; height: 500px;"></div>
 
-    <!-- from google AI results, launch terminal emulator so the app is actually usable -->
     <script>
-        // 1. Initialize Xterm.js
+        // setup xterm
         const term = new Terminal({
             cursorBlink: true,
             theme: { background: '#1e1e1e' },
@@ -27,13 +26,49 @@
             rows: 30
         });
         term.open(document.getElementById('terminal'));
-        globalThis.term = term
+        window.term = term
 
-        <!-- trying really simple implementation for now -->
+        let currentLine = '';
+
+        // load and run the Go WASM Binary
         const go = new Go();
-        WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
-            go.run(result.instance);
-        });
+        WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject)
+            .then((result) => {
+                go.run(result.instance); // Runs main() and registers runGoCommand
+                setupTerminalInput();
+            })
+            .catch((err) => {
+                term.writeln('Error loading WASM: ' + err);
+            });
+
+        // handle terminal inputs
+        function setupTerminalInput() {
+            term.onData(e => {
+                switch (e) {
+                    case '\r': // Enter key
+                        term.write('\r\n');
+                        if (currentLine.trim().length > 0) {
+                            // Call the Go function exposed via syscall/js
+                            const output = window.runGoCommand(currentLine);
+                            if (output) {
+                                term.writeln(output);
+                            }
+                        }
+                        currentLine = '';
+                        term.write('$ ');
+                        break;
+                    case '\u007F': // Backspace
+                        if (currentLine.length > 0) {
+                            currentLine = currentLine.slice(0, -1);
+                            term.write('\b \b');
+                        }
+                        break;
+                    default: // Visible characters
+                        currentLine += e;
+                        term.write(e);
+                }
+            });
+        }
     </script>
 </body>
 </html>
