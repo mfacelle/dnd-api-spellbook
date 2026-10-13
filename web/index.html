@@ -36,8 +36,28 @@
             // 4. Feed keystrokes directly into Go WASM via a exposed function
             term.onData((data) => {
                 term.writeln("onData\r\n");
-                if (globalThis.handleTerminalInput) {
-                    globalThis.handleTerminalInput(data);
+                switch (e) {
+                    case '\r': // Enter key
+                        term.write('\r\n');
+                        if (currentLine.trim().length > 0) {
+                            // Call the Go function exposed via syscall/js
+                            const output = window.runGoCommand(currentLine);
+                            if (output) {
+                                term.writeln(output);
+                            }
+                        }
+                        currentLine = '';
+                        term.write('$ ');
+                        break;
+                    case '\u007F': // Backspace
+                        if (currentLine.length > 0) {
+                            currentLine = currentLine.slice(0, -1);
+                            term.write('\b \b');
+                        }
+                        break;
+                    default: // Visible characters
+                        currentLine += e;
+                        term.write(e);
                 }
             });
         }).catch((err) => {
