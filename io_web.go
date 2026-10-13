@@ -58,6 +58,15 @@ func InitIO() {
 	// setup the custom reader and channel
 	inputChan := make(chan byte, 1024)
 	InputReader = &jsReader{ch: inputChan}
+	js.Global().Set("handleTerminalInput", js.FuncOf(func(this js.Value, args []js.Value) any {
+		if len(args) == 0 {
+			return nil
+		}
+
+		input := args[0].String()
+		InputReader.Read([]byte(input))
+		return nil
+	}))
 
 	// setup the custom writer
 	OutputWriter = &jsWriter{terminal: term}

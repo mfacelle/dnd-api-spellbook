@@ -18,57 +18,36 @@
     <div id="terminal" style="width: 100%; height: 500px;"></div>
 
     <script>
-        // setup xterm
+        // 1. Initialize Xterm.js
         const term = new Terminal({
             cursorBlink: true,
-            theme: { background: '#1e1e1e' },
-            cols: 120,
-            rows: 30
+            rows: 24,
+            cols: 80
         });
         term.open(document.getElementById('terminal'));
-        window.term = term
+        term.writeln("Loading Go WebAssembly backend...");
 
-        let currentLine = '';
-
-        // load and run the Go WASM Binary
+        // 2. Initialize Go WASM Runtime
         const go = new Go();
-        WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject)
-            .then((result) => {
-                go.run(result.instance); // Runs main() and registers runGoCommand
-                setupTerminalInput();
-            })
-            .catch((err) => {
-                term.writeln('Error loading WASM: ' + err);
-            });
+        
+        // 3. Provide a global write function for Go to output text to xterm.js
+        window.sendToTerminal = (data) => {
+            term.write(data);
+        };
 
-        // handle terminal inputs
-        function setupTerminalInput() {
-            term.onData(e => {
-                switch (e) {
-                    case '\r': // Enter key
-                        term.write('\r\n');
-                        if (currentLine.trim().length > 0) {
-                            // Call the Go function exposed via syscall/js
-                            const output = window.runGoCommand(currentLine);
-                            if (output) {
-                                term.writeln(output);
-                            }
-                        }
-                        currentLine = '';
-                        term.write('$ ');
-                        break;
-                    case '\u007F': // Backspace
-                        if (currentLine.length > 0) {
-                            currentLine = currentLine.slice(0, -1);
-                            term.write('\b \b');
-                        }
-                        break;
-                    default: // Visible characters
-                        currentLine += e;
-                        term.write(e);
+        WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
+            go.run(result.instance);
+            term.writeln("Go WASM Subsystem Active.\r\n");
+            
+            // 4. Feed keystrokes directly into Go WASM via a exposed function
+            term.onData((data) => {
+                if (window.handleTerminalInput) {
+                    window.handleTerminalInput(data);
                 }
             });
-        }
+        }).catch((err) => {
+            console.error("Failed to load WASM:", err);
+        });
     </script>
 </body>
 </html>
