@@ -9,7 +9,6 @@
      <!-- had to download and push to this repo, so it's accessible via github pages -->
     <link rel="stylesheet" href="./thirdparty/xterm/xterm.css" />
     <script src="./thirdparty/xterm/xterm.js"></script>
-    <script src="./thirdparty/xterm/xterm.js.map"></script>
     <!-- Include the Go WASM execution adapter -->
     <script src="./wasm_exec.js"></script>
 </head>
@@ -29,11 +28,6 @@
 
         // 2. Initialize Go WASM Runtime
         const go = new Go();
-        
-        // 3. Provide a global write function for Go to output text to xterm.js
-        window.sendToTerminal = (data) => {
-            term.write(data);
-        };
 
         WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
             go.run(result.instance);

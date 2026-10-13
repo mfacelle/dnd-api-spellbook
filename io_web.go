@@ -17,7 +17,7 @@ func (w *jsWriter) Write(p []byte) (n int, err error) {
 	// replace newlines with windows-style newlines
 	outputStr := strings.ReplaceAll(string(p), "\n", "\r\n")
 	// call xterm.js terminal.write() method
-	w.terminal.Call("sendToTerminal", outputStr)
+	w.terminal.Call("write", outputStr)
 	return len(p), nil
 }
 
