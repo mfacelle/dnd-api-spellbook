@@ -38,7 +38,6 @@
             
             // on data, handle special characters and pass completed lines into Go application
             term.onData((data) => {
-                term.writeln("onData\r\n");
                 switch (data) {
                     case '\r': // enter key
                         term.write('\r\n');
