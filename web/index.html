@@ -33,14 +33,14 @@
         WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
             go.run(result.instance);
             
-            // 4. Feed keystrokes directly into Go WASM via a exposed function
+            // on data, handle special characters and pass completed lines into Go application
             term.onData((data) => {
                 term.writeln("onData\r\n");
                 switch (data) {
                     case '\r': // Enter key
                         term.write('\r\n');
                         if (currentLine.trim().length > 0) {
-                            // Call the Go function exposed via syscall/js
+                            // call the Go function exposed via syscall/js
                             const output = globalThis.handleTerminalInput(currentLine);
                             if (output) {
                                 term.writeln(output);

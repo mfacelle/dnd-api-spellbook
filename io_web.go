@@ -3,6 +3,7 @@
 package main
 
 import (
+	"log"
 	"strings"
 	"syscall/js"
 )
@@ -28,6 +29,7 @@ type jsReader struct {
 
 // blocks until a byte is available, then reads
 func (r *jsReader) Read(p []byte) (n int, err error) {
+	log.Println("Read")
 	if len(p) == 0 {
 		return 0, nil
 	}
@@ -65,7 +67,7 @@ func InitIO() {
 
 		input := args[0].String()
 		InputReader.Read([]byte(input))
-		return nil
+		return true
 	}))
 
 	// setup the custom writer
