@@ -76,7 +76,7 @@ func main() {
 func processSpellName(input io.Reader) (string, error) {
 	line, err := bufio.NewReader(input).ReadString('\n')
 	if err != nil && !errors.Is(err, io.EOF) {
-		return "", fmt.Errorf("Error reading spell name: %w", err)
+		return "", fmt.Errorf("Error reading spell name %w", err)
 	}
 	name := strings.TrimSpace(line)
 
